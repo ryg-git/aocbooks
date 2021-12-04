@@ -1,0 +1,69 @@
+# Day 2
+
+## deps
+
+```elixir
+Mix.install([
+  {:kino, github: "livebook-dev/kino"}
+])
+```
+
+## Key 3
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file:")
+```
+
+```elixir
+defmodule Recursion do
+  def recur([], [h, v]), do: h * v
+
+  def recur([inst | t], [h, v]) do
+    n =
+      case inst do
+        ["forward", u] -> [h + u, v]
+        ["up", u] -> [h, v - u]
+        ["down", u] -> [h, v + u]
+      end
+
+    recur(t, n)
+  end
+end
+
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.split(&1))
+|> Enum.map(fn [ins, num] -> [ins, String.to_integer(num)] end)
+|> Recursion.recur([0, 0])
+```
+
+## Key 4
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file:")
+```
+
+```elixir
+defmodule Recursion do
+  def recur([], [h, _, v]), do: h * v
+
+  def recur([inst | t], [h, a, v]) do
+    n =
+      case inst do
+        ["forward", u] -> [h + u, a, v + a * u]
+        ["up", u] -> [h, a - u, v]
+        ["down", u] -> [h, a + u, v]
+      end
+
+    recur(t, n)
+  end
+end
+
+input
+|> Kino.Input.read()
+|> String.split("\n", trim: true)
+|> Enum.map(&String.split(&1))
+|> Enum.map(fn [ins, num] -> [ins, String.to_integer(num)] end)
+|> Recursion.recur([0, 0, 0])
+```
