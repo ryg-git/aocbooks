@@ -1,0 +1,79 @@
+# Day 3
+
+## Initialize
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.0"}
+])
+```
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file:")
+```
+
+## Key 5
+
+```elixir
+inp =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+
+[first | _] = inp
+
+ran = String.length(first) - 1
+half = div(length(inp), 2)
+
+zeros =
+  for i <- 0..ran do
+    zero_nums = Enum.count_until(inp, &(String.at(&1, i) == "0"), half + 1)
+    if zero_nums > half, do: ?0, else: ?1
+  end
+
+gamma = List.to_integer(zeros, 2)
+
+epsilon = Bitwise.bnot(gamma) |> Bitwise.&&&(2 ** (ran + 1) - 1)
+
+gamma * epsilon
+```
+
+## Key 6
+
+```elixir
+defmodule Recursion do
+  def find_ans(nums) do
+    half = div(length(nums), 2)
+    o2S = recur(nums, length(nums), half, 0, fn a, b -> if a > b, do: "0", else: "1" end)
+    co2S = recur(nums, length(nums), half, 0, fn a, b -> if a <= b, do: "0", else: "1" end)
+
+    o2 = o2S |> String.to_integer(2)
+    co2 = co2S |> String.to_integer(2)
+
+    co2 * o2
+  end
+
+  defp recur([], _, _, _, _), do: "0"
+  defp recur([number], _, _, _, _), do: get_num(number)
+
+  defp recur(nums, len, half, ind, fun) do
+    IO.inspect(nums)
+    IO.inspect(ind)
+    IO.inspect(len)
+    zero_count = Enum.count_until(nums, &(String.at(&1, ind) == "0"), half + 1)
+    one_count = len - zero_count
+    bit = fun.(zero_count, one_count)
+    IO.inspect(zero_count)
+    new_nums = Enum.filter(nums, &(String.at(&1, ind) == bit))
+    nnlen = length(new_nums)
+    recur(new_nums, nnlen, div(nnlen, 2), ind + 1, fun)
+  end
+
+  defp get_num(num) do
+    num
+  end
+end
+
+inp
+|> Recursion.find_ans()
+```
