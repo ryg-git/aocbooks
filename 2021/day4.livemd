@@ -1,0 +1,50 @@
+# Day 4
+
+## Setup
+
+```elixir
+Mix.install([{:kino, "~> 0.4.0"}])
+```
+
+```elixir
+input = Kino.Input.textarea("Add input:")
+```
+
+```elixir
+[inps | boards] =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+
+nums =
+  inps
+  |> String.split(",")
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Key 6
+
+```elixir
+defmodule FlatBoard do
+  @enforce_keys [:fb]
+  defstruct fb: %{}
+end
+
+flatboard =
+  boards
+  |> Enum.chunk_every(5)
+  |> Enum.map(
+    &(Enum.map(
+        &1,
+        fn s ->
+          String.split(s, " ", trim: true)
+          |> Enum.map(fn n -> {String.to_atom(n), false} end)
+        end
+      )
+      |> List.flatten())
+  )
+
+ab = ["22": 22]
+
+Keyword.get(ab, :"22")
+```
