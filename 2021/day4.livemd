@@ -27,10 +27,20 @@ nums =
 ```elixir
 defmodule FlatBoard do
   @enforce_keys [:fb]
-  defstruct fb: %{}
+  defstruct fb: []
+
+  def new(board) when is_list(board) do
+    %FlatBoard{fb: board}
+  end
+
+  def mark(%FlatBoard{fb: fb}, number) do
+    # put_elem(fb[Integer.to_string(number) |> String.to_atom()], 1, true)
+    fb |> Keyword.get_and_update!(Integer.to_string(number) |> String.to_atom(), &{&1, true})
+    fb
+  end
 end
 
-flatboard =
+flatboards =
   boards
   |> Enum.chunk_every(5)
   |> Enum.map(
@@ -43,8 +53,7 @@ flatboard =
       )
       |> List.flatten())
   )
+  |> Enum.map(&FlatBoard.new/1)
 
-ab = ["22": 22]
-
-Keyword.get(ab, :"22")
+Enum.at(flatboards, 0) |> FlatBoard.mark(22)
 ```
