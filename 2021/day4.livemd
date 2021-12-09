@@ -33,18 +33,17 @@ defmodule FlatBoard do
     %FlatBoard{fb: board}
   end
 
-  def mark(number, %FlatBoard{fb: fb}) do
+  def mark(%FlatBoard{fb: fb}, number) do
     # put_elem(fb[Integer.to_string(number) |> String.to_atom()], 1, true)
     num = Integer.to_string(number) |> String.to_atom()
 
     fb
     |> Enum.map(fn {k, v} -> if num == k, do: {k, true}, else: {k, v} end)
     |> FlatBoard.new()
-    |> won
   end
 
-  defp won(%FlatBoard{fb: fb} = fboard) do
-    {row_won?(fb), fboard}
+  def won(%FlatBoard{fb: fb}) do
+    row_won?(fb) || col_won?(fb)
   end
 
   defp row_won?(fb) when is_list(fb) do
@@ -58,10 +57,32 @@ defmodule FlatBoard do
     end)
   end
 
-  def col_won?(%FlatBoard{fb: _fb}) do
+  def col_won?(fb) when is_list(fb) do
+    nfb =
+      fb
+      |> Enum.chunk_every(5)
+
+    for i <- 0..4 do
+      Enum.map(nfb, &Enum.at(&1, i))
+    end
+    |> Enum.any?(fn x ->
+      x
+      |> Enum.reduce_while(true, fn {_, ac}, y ->
+        if ac and y, do: {:cont, true}, else: {:halt, false}
+      end)
+    end)
+  end
+
+  def unmarked_sum(%FlatBoard{fb: fb}) do
+    fb
+    |> Enum.filter(fn {_, n} -> Kernel.not(n) end)
+    |> Enum.map(fn {n, _} -> Atom.to_string(n) |> String.to_integer() end)
+    |> Enum.sum()
   end
 end
+```
 
+```elixir
 flatboards =
   boards
   |> Enum.chunk_every(5)
@@ -77,20 +98,41 @@ flatboards =
   )
   |> Enum.map(&FlatBoard.new/1)
 
-flatboards
-|> Enum.reduce_while(
-  {},
-  fn fb, _ ->
-    nums
-    |> Enum.reduce_while(
-      {false, {false, fb}},
-      fn nu, {_, {_, f}} ->
-        case FlatBoard.mark(nu, f) do
-          {true, f} -> {:halt, {:halt, {true, f}}}
-          {false, f} -> {:cont, {:cont, {false, f}}}
-        end
+{nn, fbb} =
+  nums
+  |> Enum.reduce_while(
+    flatboards,
+    fn num, fbs ->
+      nfbs = Enum.map(fbs, &FlatBoard.mark(&1, num))
+      if fb = Enum.find(nfbs, &FlatBoard.won/1), do: {:halt, {num, fb}}, else: {:cont, nfbs}
+    end
+  )
+
+ll =
+  fbb
+  |> FlatBoard.unmarked_sum()
+
+nn * ll
+```
+
+```elixir
+{nn2, fbb2} =
+  nums
+  |> Enum.reduce_while(
+    flatboards,
+    fn num, fbs ->
+      nfbs = Enum.map(fbs, &FlatBoard.mark(&1, num))
+
+      case Enum.reject(nfbs, &FlatBoard.won/1) do
+        [] ->
+          [fb] = nfbs
+          {:halt, {num, fb}}
+
+        nfbss ->
+          {:cont, nfbss}
       end
-    )
-  end
-)
+    end
+  )
+
+nn2 * FlatBoard.unmarked_sum(fbb2)
 ```
