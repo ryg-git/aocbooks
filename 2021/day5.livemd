@@ -1,0 +1,80 @@
+# Day 5
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+```elixir
+input = Kino.Input.textarea("Please type your input:")
+```
+
+```elixir
+lines =
+  input
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn line ->
+    line
+    |> String.split([",", " -> "])
+    |> Enum.map(&String.to_integer/1)
+  end)
+```
+
+## Kay 9
+
+```elixir
+lines
+|> Enum.filter(fn
+  [x, _, x, _] -> true
+  [_, y, _, y] -> true
+  _ -> false
+end)
+|> Enum.flat_map(fn
+  [x, y1, x, y2] ->
+    for i <- y1..y2 do
+      {x, i}
+    end
+
+  [x1, y, x2, y] ->
+    for i <- x1..x2 do
+      {i, y}
+    end
+
+  _ ->
+    {}
+end)
+|> Enum.reduce(
+  %{},
+  &Map.update(&2, &1, 1, fn c -> c + 1 end)
+)
+|> Enum.count(fn {_, v} -> v > 1 end)
+```
+
+## Key 10
+
+```elixir
+lines
+|> Enum.flat_map(fn
+  [x, y1, x, y2] ->
+    for i <- y1..y2 do
+      {x, i}
+    end
+
+  [x1, y, x2, y] ->
+    for i <- x1..x2 do
+      {i, y}
+    end
+
+  [x1, y1, x2, y2] ->
+    Enum.zip(x1..x2, y1..y2)
+end)
+|> Enum.reduce(
+  %{},
+  &Map.update(&2, &1, 1, fn c -> c + 1 end)
+)
+|> Enum.count(fn {_, v} -> v > 1 end)
+```
