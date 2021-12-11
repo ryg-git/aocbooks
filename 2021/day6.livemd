@@ -1,0 +1,66 @@
+# Day 6
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"},
+  {:nx, github: "elixir-nx/nx", sparse: "nx"}
+])
+```
+
+```elixir
+input = Kino.Input.text("Please paste your input:")
+```
+
+```elixir
+fishes =
+  input
+  |> Kino.Input.read()
+  |> String.split(",")
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Key 11
+
+```elixir
+defmodule Rec do
+  def rec(li, days) when is_list(li) and days == 0, do: Enum.count(li)
+
+  def rec(li, days) when is_list(li) and days > 0 do
+    n_li =
+      li
+      |> Enum.reduce([], &if(&1 > 0, do: [&1 - 1 | &2], else: [6, 8 | &2]))
+
+    rec(n_li, days - 1)
+  end
+end
+
+Rec.rec(fishes, 80)
+```
+
+## Key 12
+
+```elixir
+import Nx, only: :sigils
+
+matrix = ~M"""
+0 0 0 0 0 0 1 0 1
+1 0 0 0 0 0 0 0 0
+0 1 0 0 0 0 0 0 0
+0 0 1 0 0 0 0 0 0
+0 0 0 1 0 0 0 0 0
+0 0 0 0 1 0 0 0 0
+0 0 0 0 0 1 0 0 0
+0 0 0 0 0 0 1 0 0
+0 0 0 0 0 0 0 1 0
+"""
+
+nxf =
+  fishes
+  |> Enum.reduce(List.duplicate(0, 9), fn x, acc -> acc |> List.update_at(x - 1, &(&1 + 1)) end)
+  |> Nx.tensor()
+
+Enum.reduce(1..255, nxf, fn _, t -> Nx.dot(t, matrix) end)
+|> Nx.sum()
+```
