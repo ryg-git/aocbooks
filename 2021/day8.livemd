@@ -1,0 +1,33 @@
+# Day 8
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+```elixir
+input = Kino.Input.textarea("Please paste your input:")
+```
+
+```elixir
+parsed =
+  input
+  |> Kino.Input.read()
+  |> String.split([" |\n", " | ", "\n"], trim: true)
+  |> Enum.chunk_every(2)
+  |> Enum.map(fn [input, output] ->
+    {input |> String.split() |> Enum.group_by(&byte_size/1, &String.to_charlist/1),
+     output |> String.split() |> Enum.map(&String.to_charlist/1)}
+  end)
+```
+
+```elixir
+parsed
+|> Enum.map(fn {_input, output} ->
+  Enum.count(output, &(length(&1) in [2, 7, 3, 4]))
+end)
+|> Enum.sum()
+```

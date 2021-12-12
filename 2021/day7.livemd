@@ -1,0 +1,53 @@
+# Day 7
+
+## Setup
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.4.1"}
+])
+```
+
+```elixir
+input = Kino.Input.text("Please paste your input:")
+```
+
+```elixir
+line =
+  input
+  |> Kino.Input.read()
+  |> String.split(",")
+  |> Enum.map(&String.to_integer/1)
+```
+
+## Key 13
+
+```elixir
+sl = Enum.sort(line)
+
+pos = div(length(sl), 2)
+
+sl
+|> Enum.slice(pos, 2)
+|> Enum.map(fn i ->
+  Enum.map(line, fn j -> abs(j - i) end) |> Enum.sum()
+end)
+|> Enum.min()
+```
+
+## Key 14
+
+```elixir
+n = Enum.sum(line) / length(line)
+
+floor(n)..ceil(n)
+|> Enum.map(fn i ->
+  line
+  |> Enum.map(fn j ->
+    n = abs(j - i)
+    n * (n + 1) / 2
+  end)
+  |> Enum.sum()
+end)
+|> Enum.min()
+```
